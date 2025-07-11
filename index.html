@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Archify - Verifying You're In The US, The Most American Way Possible</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Lexend', sans-serif;
+      margin: 0; padding: 0; background: #f5f7fa; color: #2c3e50;
+      display: flex; flex-direction: column; min-height: 100vh;
+      justify-content: center; align-items: center; padding: 1rem;
+      text-align: center;
+    }
+    main {
+      background: white;
+      border-radius: 12px;
+      max-width: 420px;
+      width: 100%;
+      padding: 2rem;
+      box-shadow: 0 0 15px rgb(58 73 103 / 0.15);
+      position: relative;
+      min-height: 340px;
+      overflow: visible;
+    }
+    h1 {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #ff6600;
+      font-size: 1.8rem;
+    }
+    p {
+      font-size: 1rem;
+      line-height: 1.4;
+      margin-bottom: 1.5rem;
+      color: #3a4967dd;
+    }
+    b {
+      color: #3a4967;
+    }
+    button {
+      font-family: 'Lexend', sans-serif;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background-color: #ff6600;
+      color: white;
+      box-shadow: 0 4px 8px rgb(255 102 0 / 0.35);
+      transition: background-color 0.3s ease;
+      margin-top: 0.5rem;
+      user-select: none;
+    }
+    button:hover,
+    button:focus {
+      background-color: #e65c00;
+      outline: none;
+    }
+    #locationsList {
+      max-height: 200px;
+      overflow-y: auto;
+      text-align: left;
+      padding-left: 0;
+      margin-top: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f0f3f7;
+    }
+    #locationsList li {
+      list-style: none;
+      padding: 0.3rem 0.5rem;
+      border-bottom: 1px solid #ddd;
+      font-size: 0.9rem;
+      color: #3a4967;
+    }
+    #locationsList li:last-child {
+      border-bottom: none;
+    }
+    #status {
+      font-size: 0.9rem;
+      color: #999;
+      min-height: 1.3em;
+    }
+    #errorMsg {
+      font-size: 0.9rem;
+      min-height: 1.2em;
+      color: #c0392b;
+    }
+    section {
+      opacity: 0;
+      transform: translateY(15px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      position: absolute;
+      top: 0; left: 0; right: 0;
+    }
+    section.active {
+      opacity: 1;
+      transform: translateY(0);
+      position: relative;
+    }
+    .wave {
+      font-size: 2rem;
+      margin-right: 0.3rem;
+    }
+    @media (max-width: 480px) {
+      main {
+        padding: 1.5rem 1rem;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      button {
+        width: 100%;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section id="slide1" class="active" aria-live="polite" aria-label="Welcome screen" aria-hidden="false">
+      <h1><span class="wave">👋</span>Welcome to Archify!</h1>
+      <p><b id="siteName">[site]</b> is requesting if you're in the United States, but doesn't want to be invasive.</p>
+      <p>They're using Archify--simply pull up to your friendly neighborhood McDonald's, tap <b>I'm Here</b>, and share your location (if asked).</p>
+      <p>This all happens client-side, so Archify knows nothing about you.</p>
+        <p>The only thing we share with the platform is the city and state of the McDonald's you're at.</p>
+      <button id="startBtn" type="button" aria-describedby="startDesc">I'm Here</button><br>
+      <p><small><b>DISCLAIMER:</b> Anyone can implement the Archify API into their project. Archify doesn't sponsor, endorse, or promote the platform. Not sponsored or endorsed with McDonald's Restauraunts. <a href="https://vivianbostick.com/donate.php" target="_blank" rel="noopener noreferrer">Like Archify? Donate!</a></p>
+    </section>
+
+    <section id="slide2" aria-live="polite" aria-label="Location verification" aria-hidden="true">
+      <h1>🗺️ Checking for a McDonald's...</h1>
+      <p>Please allow location access, if prompted. The screen will automatically update when you're within range of a McDonald's...</p>
+      <p id="status">Waiting for your location…</p>
+      <ul id="locationsList" aria-label="Nearby McDonald's within 10 miles" role="list"></ul>
+      <p id="errorMsg" role="alert"></p>
+      <p><small><b>DISCLAIMER:</b> Anyone can implement the Archify API into their project. Archify doesn't sponsor, endorse, or promote the platform. Not sponsored or endorsed with McDonald's Restauraunts. <a href="https://vivianbostick.com/donate.php" target="_blank" rel="noopener noreferrer">Like Archify? Donate!</a></p>
+    </section>
+
+    <section id="slide3" aria-live="polite" aria-label="Confirmation screen" aria-hidden="true">
+      <h1>🍟 Great! You're at a McDonald's.</h1>
+        <p>Tap <b>Authorize</b> below to allow us to share you're at a McDonald's in <b id="finalCity">UNKNOWN</b>, <b id="finalState">UNKNOWN</b>.</p>
+        <p>The actual location won't be shared with the platform, just the city and state.</p>
+      <button id="confirmBtn" type="button">Authorize</button><br>
+      <p><small><b>DISCLAIMER:</b> Anyone can implement the Archify API into their project. Archify doesn't sponsor, endorse, or promote the platform. Not sponsored or endorsed with McDonald's Restauraunts. <a href="https://vivianbostick.com/donate.php" target="_blank" rel="noopener noreferrer">Like Archify? Donate!</a></p>
+    </section>
+  </main>
+
+<script>
+(() => {
+  function getCallbackUrl() {
+    const params = new URLSearchParams(window.location.search);
+    let cb = params.get('callback');
+    if (!cb) return null;
+    try {
+      cb = decodeURIComponent(cb);
+      if (!cb.startsWith('http://') && !cb.startsWith('https://')) {
+        cb = 'https://' + cb;
+      }
+      const urlObj = new URL(cb);
+      return urlObj.toString();
+    } catch {
+      return null;
+    }
+  }
+  function extractDomain(url) {
+    try {
+      const u = new URL(url);
+      return u.hostname.replace(/^www\./i, '');
+    } catch {
+      return '[site]';
+    }
+  }
+  function getDistance(lat1, lon1, lat2, lon2) {
+    const R = 3958.8;
+    const toRad = deg => deg * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+  function fetchMcDonalds(lat, lon, radiusMeters=5000) {
+    const query = `
+      [out:json][timeout:15];
+      node["amenity"="fast_food"]["brand"="McDonald's"](around:${radiusMeters},${lat},${lon});
+      out;`;
+    const url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query);
+    return fetch(url).then(r => {
+      if(!r.ok) throw new Error('Overpass API error');
+      return r.json();
+    }).then(data => {
+      if(!data.elements) return [];
+      return data.elements.map(el => ({
+        id: el.id,
+        lat: el.lat,
+        lon: el.lon,
+        name: el.tags.name || "McDonald's",
+        city: el.tags["addr:city"] || '',
+        state: el.tags["addr:state"] || '',
+        street: el.tags["addr:street"] || '',
+        housenumber: el.tags["addr:housenumber"] || ''
+      }));
+    });
+  }
+  function showSlide(n) {
+    [slide1, slide2, slide3].forEach((el, i) => {
+      if(i + 1 === n) {
+        el.classList.add('active');
+        el.setAttribute('aria-hidden', 'false');
+      } else {
+        el.classList.remove('active');
+        el.setAttribute('aria-hidden', 'true');
+      }
+    });
+  }
+  function updateLocationList(mcds, userLat, userLon) {
+    const ul = locationsListEl;
+    ul.innerHTML = '';
+    const maxDistance = 10;
+    const nearbyMcds = mcds
+      .map(mcd => {
+        mcd.distance = getDistance(userLat, userLon, mcd.lat, mcd.lon);
+        return mcd;
+      })
+      .filter(mcd => mcd.distance <= maxDistance)
+      .sort((a,b) => a.distance - b.distance);
+    if(nearbyMcds.length === 0) {
+      ul.innerHTML = '<li>No McDonalds found within 10 miles.</li>';
+      return;
+    }
+    nearbyMcds.forEach(mcd => {
+      const li = document.createElement('li');
+      let addr = '';
+      if(mcd.housenumber) addr += mcd.housenumber + ' ';
+      if(mcd.street) addr += mcd.street;
+      li.textContent = `${mcd.name} — ${mcd.city}, ${mcd.state} (${mcd.distance.toFixed(2)} miles)`;
+      if(addr) {
+        const addrDiv = document.createElement('div');
+        addrDiv.style.fontStyle = 'italic';
+        addrDiv.style.color = '#666';
+        addrDiv.textContent = addr;
+        li.appendChild(addrDiv);
+      }
+      ul.appendChild(li);
+    });
+  }
+  function redirectWithLocation(cbUrl, city, state) {
+    city = city || 'UNKNOWN';
+    state = state || 'UNKNOWN';
+    const sep = hasQueryParams(cbUrl) ? '&' : '?';
+    window.location.href = `${cbUrl}${sep}archify=${encodeURIComponent(city)},${encodeURIComponent(state)}`;
+  }
+  function hasQueryParams(url) {
+    try {
+      const u = new URL(url);
+      return u.search.length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  const slide1 = document.getElementById('slide1');
+  const slide2 = document.getElementById('slide2');
+  const slide3 = document.getElementById('slide3');
+  const siteNameEls = [document.getElementById('siteName')].filter(Boolean);
+  const statusEl = document.getElementById('status');
+  const errorMsgEl = document.getElementById('errorMsg');
+  const finalCityEl = document.getElementById('finalCity');
+  const finalStateEl = document.getElementById('finalState');
+  const startBtn = document.getElementById('startBtn');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const locationsListEl = document.getElementById('locationsList');
+
+  const CALLBACK_URL = getCallbackUrl();
+  if(!CALLBACK_URL) {
+    window.location.href = 'https://github.com/vivcod3s/archify/blob/main/README.md';
+    return;
+  }
+  const SITE_NAME = extractDomain(CALLBACK_URL);
+  siteNameEls.forEach(el => el.textContent = SITE_NAME);
+
+  let userLat = null, userLon = null;
+  let nearestMcd = null;
+  const RADIUS_MILES = 0.25;
+  const RADIUS_METERS = 402;
+
+  showSlide(1);
+
+  startBtn.addEventListener('click', () => {
+    showSlide(2);
+    startLocationChecks();
+  });
+
+  confirmBtn.addEventListener('click', () => {
+    if(nearestMcd) {
+      redirectWithLocation(CALLBACK_URL, nearestMcd.city || 'UNKNOWN', nearestMcd.state || 'UNKNOWN');
+    }
+  });
+
+let lastFetchLat = null;
+let lastFetchLon = null;
+const FETCH_DISTANCE_THRESHOLD_MILES = 5;
+
+function startLocationChecks() {
+  if(!navigator.geolocation) {
+    errorMsgEl.textContent = 'Geolocation not supported by your browser.';
+    return;
+  }
+  errorMsgEl.textContent = '';
+  statusEl.textContent = 'Getting your location...';
+
+  function check() {
+    navigator.geolocation.getCurrentPosition(pos => {
+      userLat = pos.coords.latitude;
+      userLon = pos.coords.longitude;
+      statusEl.textContent = "Here are some locations near you (updates every 10 seconds)...";
+
+      let movedEnoughToRefetch = true;
+      if(lastFetchLat !== null && lastFetchLon !== null) {
+        const distFromLastFetch = getDistance(userLat, userLon, lastFetchLat, lastFetchLon);
+        movedEnoughToRefetch = distFromLastFetch > FETCH_DISTANCE_THRESHOLD_MILES;
+      }
+
+      if(movedEnoughToRefetch || lastFetchedLocations.length === 0) {
+        fetchMcDonalds(userLat, userLon, 16093)
+          .then(mcds => {
+            lastFetchedLocations = mcds;
+            lastFetchLat = userLat;
+            lastFetchLon = userLon;
+            processLocations();
+          }).catch(() => {
+            errorMsgEl.textContent = 'Error fetching McDonalds locations.';
+          });
+      } else {
+        processLocations();
+      }
+    }, err => {
+      errorMsgEl.textContent = 'Error getting location: ' + err.message;
+    });
+  }
+
+  function processLocations() {
+    if(!lastFetchedLocations.length) {
+      locationsListEl.innerHTML = '<li>No McDonalds found nearby.</li>';
+      nearestMcd = null;
+      return;
+    }
+    updateLocationList(lastFetchedLocations, userLat, userLon);
+
+    const found = lastFetchedLocations.find(mcd => {
+      const dist = getDistance(userLat, userLon, mcd.lat, mcd.lon);
+      return dist <= RADIUS_MILES;
+    });
+
+    if(found) {
+      nearestMcd = found;
+      finalCityEl.textContent = nearestMcd.city || 'UNKNOWN';
+      finalStateEl.textContent = nearestMcd.state || 'UNKNOWN';
+      showSlide(3);
+    } else {
+      nearestMcd = null;
+    }
+  }
+
+  check();
+  setInterval(check, FETCH_INTERVAL_MS);
+}
+
+})();
+</script>
+</body>
+</html>
