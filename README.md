@@ -1,4 +1,4 @@
-# This Is Archify.
+# This Is Archify | [Try It Yourself!](https://archify.strangled.net/?callback=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DdQw4w9WgXcQ)
 **DISCLAIMER:** Not Sponsored or Endorsed by McDonald's Restauraunts.
 ## Introduction
 Hey, developers! Want a no-frills way to verify where your users are in the United States, without being invasive with their data? 
@@ -24,3 +24,9 @@ Our endpoint is: `https://archify.strangled.net/?callback=[YOUR URL]`
 Once your users has tapped `Authorize`, they'll be redirected to `[YOUR URL][? or &, depending on if you have any other GET parameters]archify=[CITY],[STATE]`. 
 
 **NOTE (x2):** If the McDonald's city or state is unknown, the city or state should appear as `UNKNOWN`.
+# Credits
+- **[viv](https://github.com/vivcod3s/)** - Developer
+- **[Donators](https://vivianbostick.com/donate.php)** - Thank You!
+- **[Overpass API](https://overpass-api.de)** - Find McDonald's Locations
+- **[Github Pages](https://pages.github.com)** - Hosting
+- **[FreeDNS](https://freedns.afraid.org)** - Access to the `Archify.strangled.net` subdomain
